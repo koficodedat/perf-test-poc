@@ -1,0 +1,22 @@
+{
+  "name": "perf-test-poc",
+  "version": "1.0.0",
+  "description": "performance testing library",
+  "author": "kofi nedjoh",
+  "license": "MIT",
+  "type": "module",
+  "scripts": {
+    "test": "ts-node --esm src/index.mts",
+    "runner": "node_modules/artillery/bin/run run"
+  },
+  "devDependencies": {
+    "@types/node": "^18.15.11",
+    "nodemon": "^2.0.22",
+    "ts-node": "^10.9.1",
+    "typescript": "^5.0.3"
+  },
+  "dependencies": {
+    "artillery": "^2.0.0-31",
+    "commander": "^10.0.1"
+  }
+}

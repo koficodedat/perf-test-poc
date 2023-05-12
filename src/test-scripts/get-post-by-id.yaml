@@ -1,0 +1,33 @@
+config:
+  target: "https://jsonplaceholder.typicode.com" # base url
+  plugins:
+    ensure: {}
+  ensure: 
+    thresholds:
+        # p99 of response time must be <250:
+        - "http.response_time.p99": 250
+        # p95 of response time must be <200:
+        - "http.response_time.p95": 200
+    conditions:
+          - expression: "http.codes.200 > 0 and vusers.failed == 0"
+            strict: true
+  phases:
+    - duration: 15 # duration of phase in seconds
+      arrivalRate: 5 # number of simultaneous users
+      name: WARM UP # description of phase
+  # payload:
+  #   path: ../seed/post-ids.csv
+  #   name: post_ids
+  #   skipHeader: true
+  #   order: sequence
+  #   fields: 
+  #     - "id"
+  #   loadAll: true
+
+scenarios:
+  - name: "GET POST BY ID"
+    flow:
+      - loop:
+          - get:
+              url: "/posts/{{ $loopCount }}"
+        count: 10

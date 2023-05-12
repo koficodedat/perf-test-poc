@@ -1,0 +1,30 @@
+config:
+  target: "https://jsonplaceholder.typicode.com" # base url
+  plugins:
+    ensure: {}
+  ensure: 
+    conditions:
+          - expression: "http.codes.200 > 0 and vusers.failed == 0"
+            strict: true
+  phases:
+    - duration: 15 # duration of phase in seconds
+      arrivalRate: 5 # number of simultaneous users
+      name: WARM UP # description of phase
+
+scenarios:
+  - name: "GET COMMENTS BY POST ID"
+    flow:
+      - loop:
+          - get:
+              url: "/comments?postId={{ $loopElement }}"
+        over: 
+          - 1
+          - 2
+          - 3
+          - 4
+          - 5
+          - 6
+          - 7
+          - 8
+          - 9
+          - 10
