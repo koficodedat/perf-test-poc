@@ -15,19 +15,11 @@ config:
     - duration: 15 # duration of phase in seconds
       arrivalRate: 5 # number of simultaneous users
       name: WARM UP # description of phase
-  payload:
-    path: ../seed/post-ids.csv
-    name: post_ids
-    skipHeader: true
-    order: sequence
-    fields: 
-      - "id"
-    loadAll: true
 
 scenarios:
-  - name: "GET COMMENTS FROM POST"
+  - name: "GET POST BY ID"
     flow:
       - loop:
           - get:
-              url: "/posts/{{ $loopElement.id }}/comments"
-        over: post_ids
+              url: "/posts/{{ $loopCount }}"
+        count: 10

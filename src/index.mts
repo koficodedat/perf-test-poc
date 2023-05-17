@@ -3,16 +3,34 @@ import path from 'path'
 import { spawn } from 'child_process'
 import { __dirname, get_file_names } from './utility.mjs'
 
-const file_names =  await get_file_names( path.resolve(__dirname, 'test-scripts'), ['.yml', '.yaml'] )
+type Options = {
+    report?: boolean,
+    no_tls?: boolean
+}
 
-const run_test = (file_name: string) => {
+const file_names = await get_file_names( path.resolve(__dirname, 'test-scripts'), ['.yml', '.yaml'] )
+
+const run_test = (file_name: string, { report, no_tls }: Options = {}) => {
     return new Promise<void>(
         (resolve, reject) => {
             console.log(`################ SCENARIO ################\n ${file_name} \n################ SCENARIO ################`)
 
             let should_filter_results_data = true
+            let report_file_name = ''
 
-            const runner = spawn('yarn', ['runner', `${path.resolve(__dirname, 'test-scripts')}/${file_name}`])
+            if( report ) {
+                const date = new Date()
+                const month = date.getUTCMonth()
+                const day = date.getUTCDay()
+                const year = date.getUTCFullYear()
+                const hour = date.getUTCHours()
+                const minutes = date.getUTCMinutes()
+                const seconds = date.getUTCSeconds()
+
+                report_file_name = `${file_name.replace(/\.(yaml|yml)/g, '')}_${month}-${day}-${year}_${hour}-${minutes}-${seconds}`
+            }
+
+            const runner = spawn('yarn', ['runner', `${report ? `-o ${path.resolve(__dirname, 'reports', `${report_file_name}.json`)}` : ''}`,  `${no_tls ? '-k' : ''}`, `${path.resolve(__dirname, 'test-scripts')}/${file_name}`], { shell: true })
 
             runner.stdout.on('data', (data: string) => {
                 let _data = `${data}`
@@ -23,6 +41,7 @@ const run_test = (file_name: string) => {
                         _data.includes('Phase started') 
                         || _data.includes('Phase completed') 
                         || _data.includes('Summary report')
+                        // || _data.includes('WARNING')
                     ) 
                 ) {
                     if( _data.includes('Phase started') || _data.includes('Phase completed')  ) {
@@ -40,16 +59,9 @@ const run_test = (file_name: string) => {
                     if( _data.includes('Checks:') ) {
                         _data = _data.replace(/\n/, '').replace('Checks:', `--------------------------------\nChecks\n--------------------------------`)
                     }
-                    
-                    if( _data.includes('ok:') || _data.includes('fail:') ) {
-                        // _data = _data.replace(/\n\n/g, '')
-                    }
-
-                    console.log(_data)
                 
+                    console.log(_data)
                 }
-
-                // console.log(_data)
             })
             runner.stderr.on( 'data', (data) => console.error(`\n${data}`) )
             runner.on('close', (code: number) => {
@@ -69,14 +81,16 @@ program
     .command('by-name')
     .description('run performance test(s) by name')
     .argument('<name>', 'name of test. finds files in test-scripts directory by using the starts with string search.')
-    .action(async (name) => {
+    .option('-r, --report', 'writes report to a json file')
+    .option('-i, --no-tls', 'turn off tls verification. not recommened in production')
+    .action(async (name, { report, no_tls }) => {
         const filtered_file_names = file_names.filter( (_name: string) => _name.startsWith(name) )
 
         if( filtered_file_names.length ) console.log(`\n################# MATCHING FILE(S) ################\n- ${filtered_file_names.join('\n- ')}\n################# MATCHING FILE(S) ################\n`)
 
         for(const file_name of filtered_file_names) {
             try {
-                await run_test(file_name)
+                await run_test(file_name, { report, no_tls })
             } catch(error: any) {
                 console.error(`${error.message}`)
             }

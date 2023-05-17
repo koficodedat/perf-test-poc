@@ -6,8 +6,9 @@
 > You may use that for reference to create you own test scripts.
 
 ## Requirement
-- Node `18.12.1 and up`
-- NPM `8.19.2 and up`
+- Node `16.16.0 and up`
+- NPM `8.11.0 and up`
+- Yarn: `yarn` is used to run test **programatically**. it needs to be installed globally with `npm i -g yarn`
 
 ## Steps to run
 - Clone repo
@@ -15,15 +16,21 @@
 - Add test scripts under `src/test-scripts`
 - So far, you can only run test scripts by name using the command `yarn test by-name {test-file-name}`. 
 
-> test-file-name matches the any file in `src/test-scripts` with a **starts with** check. Eg. If you have two files that start with **get-post**, it will run them sequentially.
+> `test-file-name` matches the any file in `src/test-scripts` with a **starts with** check. Eg. If you have two files that start with **get-post**, it will run them sequentially.
 
-You may also use `npm run test by-name {test-file-name}` to run any test
+> You may also use `npm run test by-name {test-file-name}` to run any test
+
+## Commands
+| command   | options                                       |
+| --------- | --------------------------------------------- |
+| `by-name` | `-r`: generate report, `-i`: ignore tls check |
 
 ## Folder Structure
 - root
   - src
-    - assets `[directory to house all files you might upload in your test].` head over [here](https://www.artillery.io/docs/guides/plugins/plugin-file-uploads) to learn more.
+    - assets `[directory to house all files you might use/upload in your test].`
     - processors `[directory to house all custom js modules you might run in a post or pre stage of your test].` head over [here](https://www.artillery.io/docs/guides/guides/http-reference#writing-custom-logic-in-javascript) to learn more.
+    - reports `[directory to house all json reports of test runs].` will only generate report when `-r` option is used with `by-name` command.
     - seed `directory to house all csv data you might want to use in your test as seed data.` head over [here](https://www.artillery.io/docs/guides/getting-started/writing-your-first-test#injecting-data-from-an-external-file) to learn more.
     - test-scripts `[directory to house all artillery written test scripts in yaml/yml format]`
     - index.mts `[file to house runner logic].` should not be modified or deleted.
